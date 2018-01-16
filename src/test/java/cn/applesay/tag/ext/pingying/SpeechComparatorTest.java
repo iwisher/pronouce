@@ -1,5 +1,6 @@
 package cn.applesay.tag.ext.pingying;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -25,13 +26,16 @@ public class SpeechComparatorTest {
     @Test
     public void testSimilarityScore1() throws Exception {
         double score = speechComparator.similarityScore("第一节哎","DJI");
-        System.out.println("Socre is "+ score);
+        System.out.println("Score is "+ score);
+        Assert.assertTrue(score > 0.5);
 
         score = speechComparator.similarityScore("第节哎","DJI");
-        System.out.println("Socre is "+ score);
+        System.out.println("Score is "+ score);
+        Assert.assertTrue(score == 1.0);
 
         score = speechComparator.similarityScore("滑雪衫","化雪三");
-        System.out.println("Socre is "+ score);
+        System.out.println("Score is "+ score);
+        Assert.assertTrue(score > 0.9);
     }
 
     @Test

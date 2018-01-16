@@ -57,6 +57,12 @@ public class LongestCommonSubstring
         // it can be used to know which algorithm is better
         int comparisons = 0;
 
+        /*
+            Add two past pos score to keep short term memory
+            Currently memory is only skip 1 mismatch
+             */
+        boolean isSkip = true;
+
         for (int i = 0; i < target_size; ++i)
         {
             int m = i;
@@ -81,8 +87,15 @@ public class LongestCommonSubstring
                         target_start = m - longest + 1;
                         alternative_start = n - longest + 1;
                     }
+                    isSkip = true;
                 }else
                 {
+                    if(isSkip)
+                    {
+                        ++m;
+                        isSkip =false;
+                        continue;
+                    }
                     score =0;
                     length =0;
                 }
@@ -144,6 +157,7 @@ public class LongestCommonSubstring
         // it can be used to know which algorithm is better
         int comparisons = 0;
 
+
         for (int i = 0; i < target_size; ++i)
         {
             int m = i;
@@ -151,6 +165,14 @@ public class LongestCommonSubstring
             //Matched length in this round
             double score = 0;
             int length = 0;
+
+
+            /*
+            Add two past pos score to keep short term memory
+            Currently memory is only skip 1 mismatch
+             */
+            boolean isSkip = true;
+
             while (m < target_size && n < alternative_size)
             {
                 ++comparisons;
@@ -163,13 +185,14 @@ public class LongestCommonSubstring
                 int currentToneScore = Math.abs(pinyinTarget.getTone() - pinyinAlternative.getTone());
 
 
-
                 if (currentConsonantScore > SCORE_NO_MATCH && currentVowelScore >SCORE_NO_MATCH)
                 {
                     ++length;
                     double currentScore = (SCORE_UNIT*2.0 - Math.sqrt((SCORE_UNIT - currentConsonantScore)^2 + (SCORE_UNIT - currentVowelScore)^2))/2;
-                    score +=  removeTone? currentScore:
+                    currentScore = removeTone? currentScore:
                             currentScore*(currentToneScore==SCORE_NO_MATCH?1.0:0.9);
+
+                    score += currentScore ;
 
                     if (highestScore < score)
                     {
@@ -178,10 +201,19 @@ public class LongestCommonSubstring
                         target_start = m - longest + 1;
                         alternative_start = n - longest + 1;
                     }
+                    isSkip = true;
                 } else{
-                    score =0.0d;
-                    length =0;
+                    if (isSkip)
+                    {
+                        isSkip = false;
+                        ++m;
+                        continue;
+                    }
+                        score =0.0d;
+                        length =0;
                 }
+
+
 
                 ++m;
                 ++n;
