@@ -16,7 +16,7 @@ import java.util.Properties;
 public class SpeechComparator
 {
     private double pinyinWeight = 0.6D;
-    private PinyinTransfomer pinyinTransfomer = null;
+    //private PinyinTransfomer pinyinTransfomer = null;
     private Evaluator eval = null;
 
     public SpeechComparator(String currentDirectory, String speechSimilarityEstimatorFile) {
@@ -34,7 +34,7 @@ public class SpeechComparator
         boolean isCharacterLevel = Boolean.parseBoolean(prop.getProperty("isCharacterLevel"));*/
         String similarityFile = currentDirectory + prop.getProperty("similarityFile");
         this.pinyinWeight = Double.parseDouble(prop.getProperty("pinyinWeight"));
-        this.pinyinTransfomer = new PinyinTransfomer(HanyuPinyinToneType.WITHOUT_TONE, HanyuPinyinVCharType.WITH_V, HanyuPinyinCaseType.LOWERCASE);
+        //this.pinyinTransfomer = new PinyinTransfomer(HanyuPinyinToneType.WITHOUT_TONE, HanyuPinyinVCharType.WITH_V, HanyuPinyinCaseType.LOWERCASE);
         this.eval = new Evaluator(similarityFile);
     }
 
@@ -43,23 +43,23 @@ public class SpeechComparator
     {
         double similarity = 0.0D;
         double pinyinSimilarity = 0.0D;
-        double writingSimilarity = 0.0D;
-
-        speech = DeleteEndingPunctuation.process(speech);
-        gold = DeleteEndingPunctuation.process(gold);
 
 
-        List<String[]> pinyinSpeech =  this.pinyinTransfomer.getTermPinYin(speech);
-        List<String[]> pinyinGold = this.pinyinTransfomer.getTermPinYin(gold);
+        //speech = DeleteEndingPunctuation.process(speech);
+        //gold = DeleteEndingPunctuation.process(gold);
+
+
+        //List<String[]> pinyinSpeech =  this.pinyinTransfomer.getTermPinYin(speech);
+        //List<String[]> pinyinGold = this.pinyinTransfomer.getTermPinYin(gold);
 
 
 
 
-        if ((pinyinSpeech.size() > 0) && (pinyinGold.size() > 0)) {
-            pinyinSimilarity = this.eval.evaluate(pinyinSpeech.get(0), pinyinGold.get(0)).getTotalSyllableScore() / 100.0F;
-        }
-        writingSimilarity = LongestCommonSubsequence.computeSimilarity(speech, gold);
-        similarity = this.pinyinWeight * pinyinSimilarity + (1.0D - this.pinyinWeight) * writingSimilarity;
+        //if ((pinyinSpeech.size() > 0) && (pinyinGold.size() > 0)) {
+            //pinyinSimilarity = this.eval.evaluate(pinyinSpeech.get(0), pinyinGold.get(0)).getTotalSyllableScore() / 100.0F;
+        //}
+        //writingSimilarity = LongestCommonSubsequence.computeSimilarity(speech, gold);
+        similarity = this.pinyinWeight * pinyinSimilarity;// + (1.0D - this.pinyinWeight) * writingSimilarity;
 
         return similarity;
     }
@@ -89,12 +89,5 @@ public class SpeechComparator
         return similarity;
     }*/
 
-    public PinyinTransfomer getPinyinTransfomer() {
-        return this.pinyinTransfomer;
-    }
-
-    public void setPinyinTransfomer(PinyinTransfomer pinyinTransfomer) {
-        this.pinyinTransfomer = pinyinTransfomer;
-    }
 }
 

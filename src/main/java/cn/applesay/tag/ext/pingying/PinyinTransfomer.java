@@ -2,6 +2,11 @@ package cn.applesay.tag.ext.pingying;
 
 
 
+import cn.applesay.tag.ext.util.DeleteEndingPunctuation;
+import com.hankcs.hanlp.HanLP;
+import com.hankcs.hanlp.dictionary.py.Pinyin;
+import com.hankcs.hanlp.dictionary.py.PinyinUtil;
+import com.hankcs.hanlp.dictionary.py.String2PinyinConverter;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -9,65 +14,58 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 public class PinyinTransfomer
 {
-
-
-    private HanyuPinyinOutputFormat format= new HanyuPinyinOutputFormat();
-
-    /*
-        3. Several output format
-            3.1. Uppercase or lowercase
-            3.2. v or u: or unicode ü
-            3.3. unicode output with tone numbers, with tone marks or without tone
+    /**
+     * Initial English Char to Pinyin
      */
-    public PinyinTransfomer(HanyuPinyinToneType toneType, HanyuPinyinVCharType vCharType, HanyuPinyinCaseType caseType)
+    private static Properties prop = new Properties();
+    static
     {
-        format.setToneType(toneType);
-        format.setVCharType(vCharType);
-        format.setCaseType(caseType);
+        final String currentDirectory ="pinying/";
+        final String speechSimilarityEstimatorFile="alphabetPronunce.properties";
+        try {
+            InputStream fileInputStream = SpeechComparator.class.getClassLoader().getResourceAsStream(currentDirectory+speechSimilarityEstimatorFile);
+            prop.load(fileInputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public String[] getHomophony(char charactor)
-            throws BadHanyuPinyinOutputFormatCombination
+    public static List<Pinyin> getHanLPPinYin(String str)
     {
-        String[] homophony = PinyinHelper.toHanyuPinyinStringArray(charactor,this.format);
+        str = DeleteEndingPunctuation.removePunctuation(str);
+        List<Pinyin> pinyinList  = HanLP.convertToPinyinList(str);
+        List<Pinyin> translatedPinyinList = new ArrayList<Pinyin>();
 
-        Set<String> homophonySet = new HashSet<String>(Arrays.asList(homophony));
-        /*
-            Use set to dedupe the pinyin without tone
-         */
-        return homophonySet.toArray(new String[homophonySet.size()]);
-    }
-
-    /*
-        Instead of return one PinYin String. It return all Homophony. During evaluation, it will pickup the most likely
-        Homophony for each char to reduce the calculation on combination
-     */
-    public List<String[]> getTermPinYin(String str)
-            throws BadHanyuPinyinOutputFormatCombination
-    {
-        List<String[]> pinYinString = new ArrayList<String[]>();
-        for(int i = 0; i < str.length(); ++i)
+        int index = -1;
+        for(Pinyin p: pinyinList)
         {
-            //tempPinyin =getCharacterPinYin(str.charAt(i));
-            String[] tempPinyin = getHomophony(str.charAt(i));
+            ++index;
 
-            if(tempPinyin == null)
+            if(p == Pinyin.none5)
             {
 
                 /*
                 @Todo 如果str.charAt(i)非汉字，从配置文件中读取非汉字之母发音
                  */
-                pinYinString.add(Arrays.asList(String.valueOf(str.charAt(i))).toArray(new String[1]));
+                String value = prop.getProperty(String.valueOf(str.charAt(index)).toLowerCase());
+                if (value != null)
+                {
+                    String[] syllables = value.split("\\s+");
+                    for(String syllable : syllables)
+                        translatedPinyinList.add(String2PinyinConverter.convertSingle(syllable));
+                }
             }
             else
             {
-                pinYinString.add(tempPinyin);
+                translatedPinyinList.add(p);
             }
         }
-        return pinYinString;
+        return translatedPinyinList;
     }
 }

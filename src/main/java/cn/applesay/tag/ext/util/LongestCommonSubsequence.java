@@ -1,5 +1,9 @@
 package cn.applesay.tag.ext.util;
 
+/**
+ * A util for reference later
+ * Not using now
+ */
 public class LongestCommonSubsequence {
   public static double computeSimilarity(String x, String y) {
     x = x.trim();

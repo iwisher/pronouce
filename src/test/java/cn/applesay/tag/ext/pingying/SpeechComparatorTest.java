@@ -14,7 +14,8 @@ public class SpeechComparatorTest {
     @Test
     public void testSimilarityScore() throws Exception {
         SpeechComparator speechComparator = new SpeechComparator(currentDirectory,speechSimilarityEstimatorFile);
-        speechComparator.similarityScore("男死开衫","男式开衫");
+        Double score = speechComparator.similarityScore("男死开衫","男式率伞");
+        System.out.println("Socre is "+ score);
     }
 
     @Test
