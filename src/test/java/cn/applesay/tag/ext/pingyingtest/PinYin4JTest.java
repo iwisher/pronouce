@@ -1,5 +1,6 @@
 package cn.applesay.tag.ext.pingyingtest;
 
+/*
 import cn.applesay.tag.ext.pingying.AlphabetPronouce;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -10,13 +11,14 @@ import net.sourceforge.pinyin4j.*;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
 import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
+*/
 
 /**
  * Created by rsong on 12/28/17.
  */
 public class PinYin4JTest {
 
-    static HanyuPinyinOutputFormat format= new HanyuPinyinOutputFormat();
+    /*static HanyuPinyinOutputFormat format= new HanyuPinyinOutputFormat();
     static {
         format.setToneType(HanyuPinyinToneType.WITH_TONE_MARK);
         format.setVCharType(HanyuPinyinVCharType.WITH_U_UNICODE);
@@ -93,5 +95,6 @@ public class PinYin4JTest {
         System.out.println(AlphabetPronouce.getCharPronunce('a'));
 
     }
+    */
 
 }

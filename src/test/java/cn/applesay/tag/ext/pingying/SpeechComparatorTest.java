@@ -29,6 +29,9 @@ public class SpeechComparatorTest {
 
         score = speechComparator.similarityScore("第节哎","DJI");
         System.out.println("Socre is "+ score);
+
+        score = speechComparator.similarityScore("滑雪衫","化雪衫");
+        System.out.println("Socre is "+ score);
     }
 
     @Test

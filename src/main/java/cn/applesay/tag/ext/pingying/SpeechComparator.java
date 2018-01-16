@@ -1,11 +1,7 @@
 package cn.applesay.tag.ext.pingying;
 
 
-import cn.applesay.tag.ext.util.DeleteEndingPunctuation;
-import cn.applesay.tag.ext.util.LongestCommonSubsequence;
-
 import com.hankcs.hanlp.dictionary.py.Pinyin;
-import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -3,11 +3,12 @@ package cn.applesay.tag.ext.pingying;
 import cn.applesay.tag.ext.util.LongestCommonSubstring;
 import com.hankcs.hanlp.dictionary.py.Pinyin;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
 
 public class Evaluator
 {
@@ -55,10 +56,9 @@ public class Evaluator
    */
   public double evaluateSyllable(List<Pinyin> prediction, List<Pinyin> annotation, boolean removeTone) {
 
-    ArrayList<String> predictionTone = getPinyinString(prediction, SyllablePart.both);
-    ArrayList<String> annotationTone = getPinyinString(annotation, SyllablePart.both);
+
     int length = Math.max(prediction.size(),annotation.size());
-    return this.lcs.compute(predictionTone,annotationTone)/((double) length * LongestCommonSubstring.SCORE_UNIT * 2);
+    return this.lcs.computeSyllable(prediction,annotation,removeTone)/((double) length * LongestCommonSubstring.SCORE_UNIT * 2);
   }
 
   /**
@@ -68,10 +68,10 @@ public class Evaluator
    * @return
    */
   public double evaluateConsonant(List<Pinyin> prediction, List<Pinyin> annotation) {
-    ArrayList<String> predictionTone = getPinyinString(prediction, SyllablePart.consotant);
-    ArrayList<String> annotationTone = getPinyinString(annotation, SyllablePart.consotant);
+    ArrayList<String> predictionConsonant = getPinyinString(prediction, SyllablePart.consotant);
+    ArrayList<String> annotationConsonant = getPinyinString(annotation, SyllablePart.consotant);
     int length = Math.max(prediction.size(),annotation.size());
-    return this.lcs.compute(predictionTone,annotationTone)/((double) length * LongestCommonSubstring.SCORE_UNIT);
+    return this.lcs.compute(predictionConsonant,annotationConsonant)/((double) length * LongestCommonSubstring.SCORE_UNIT);
   }
 
   /**
@@ -81,10 +81,10 @@ public class Evaluator
    * @return
    */
   public double evaluateVowel(List<Pinyin> prediction, List<Pinyin> annotation) {
-    ArrayList<String> predictionTone = getPinyinString(prediction, SyllablePart.vowl);
-    ArrayList<String> annotationTone = getPinyinString(annotation, SyllablePart.vowl);
+    ArrayList<String> predictionVowel = getPinyinString(prediction, SyllablePart.vowl);
+    ArrayList<String> annotationVowel = getPinyinString(annotation, SyllablePart.vowl);
     int length = Math.max(prediction.size(),annotation.size());
-    return this.lcs.compute(predictionTone,annotationTone)/((double) length * LongestCommonSubstring.SCORE_UNIT);
+    return this.lcs.compute(predictionVowel,annotationVowel)/((double) length * LongestCommonSubstring.SCORE_UNIT);
   }
 
   /**

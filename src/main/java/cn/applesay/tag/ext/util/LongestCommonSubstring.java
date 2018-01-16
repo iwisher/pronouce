@@ -1,5 +1,7 @@
 package cn.applesay.tag.ext.util;
 
+import com.hankcs.hanlp.dictionary.py.Pinyin;
+
 import java.util.*;
 
 /**
@@ -12,6 +14,7 @@ public class LongestCommonSubstring
 {
     public static final int SCORE_UNIT = 10;
     public static final String CONCATENATED_STRING = "+";
+    public static final int SCORE_NO_MATCH = 0;
     private HashMap<String, Integer> switchableMap = null;
     //private Comparator<?> comparator = null;
 
@@ -36,7 +39,7 @@ public class LongestCommonSubstring
         int highestScore_reverse = getHighestScore(alternative, target);
 
         // shift string2 to find the longest com.hankcs.common substring
-        return highestScore >= highestScore_reverse? highestScore:highestScore_reverse;
+        return Math.max(highestScore,highestScore_reverse);
     }
 
     private int getHighestScore(List<String> target, List<String> alternative) {
@@ -65,11 +68,12 @@ public class LongestCommonSubstring
             {
                 ++comparisons;
 
-                //If exactly match
-                if (target.get(m).equalsIgnoreCase(alternative.get(n)))
+                int currentScore = getEvalScore(target.get(m),alternative.get(n));
+
+                if (currentScore > SCORE_NO_MATCH)
                 {
                     ++length;
-                    score += SCORE_UNIT;
+                    score += currentScore;
                     if (highestScore < score)
                     {
                         highestScore = score;
@@ -77,27 +81,102 @@ public class LongestCommonSubstring
                         target_start = m - longest + 1;
                         alternative_start = n - longest + 1;
                     }
-                } else if (switchableMap != null)
+                }else
                 {
-                    /**
-                     * Prepare alternative map
-                     */
-                    String mapKey = target.get(m).trim() + CONCATENATED_STRING + alternative.get(n).trim();
-                    String mapKey2 = alternative.get(n).trim() +CONCATENATED_STRING + target.get(m).trim();
-                    Integer switchScore = switchableMap.get(mapKey) != null? switchableMap.get(mapKey):switchableMap.get(mapKey2);
-                    if (switchScore != null)
+                    score =0;
+                    length =0;
+                }
+
+                ++m;
+                ++n;
+            }
+        }
+        System.out.printf("from %d of %s and %d of %s, compared for %d times\t Max score is %d\t Max length is %d \n",
+                target_start, target, alternative_start, alternative, comparisons, highestScore, longest);
+        return highestScore;
+    }
+
+    private int getEvalScore(String src, String target)
+    {
+        int score = SCORE_NO_MATCH;
+        if (src.equalsIgnoreCase(target)) {
+            score = SCORE_UNIT;
+        }
+        else if (switchableMap != null)
+        {
+            String mapKey = src.trim() + CONCATENATED_STRING + target.trim();
+            String mapKey2 = target.trim() +CONCATENATED_STRING + src.trim();
+            Integer switchScore = switchableMap.get(mapKey) != null? switchableMap.get(mapKey):switchableMap.get(mapKey2);
+            if (switchScore != null)
+            {
+                score = switchScore;
+            }
+        }
+
+        return score;
+    }
+
+    public  double computeSyllable(List<Pinyin> target, List<Pinyin> alternative, boolean removeTone)
+    {
+        if (target == null || target.size() ==0 || alternative == null || alternative.size()==0)
+            return 0;
+
+
+        double highestScore = getPinyingScore(target, alternative,removeTone);
+        double highestScore_reverse = getPinyingScore(alternative, target,removeTone);
+
+        // shift string2 to find the longest com.hankcs.common substring
+        return Math.max(highestScore,highestScore_reverse);
+    }
+
+    private double getPinyingScore(List<Pinyin> target, List<Pinyin> alternative, boolean removeTone) {
+        int target_size = target.size();
+        int alternative_size = alternative.size();
+        // the start position of substring in original string
+        int target_start = -1;
+        int alternative_start = -1;
+
+        //The biggest score, unit is 10
+        int highestScore = 0;
+        int longest=0;
+
+        // record how many comparisons the solution did;
+        // it can be used to know which algorithm is better
+        int comparisons = 0;
+
+        for (int i = 0; i < target_size; ++i)
+        {
+            int m = i;
+            int n = 0;
+            //Matched length in this round
+            int score = 0;
+            int length = 0;
+            while (m < target_size && n < alternative_size)
+            {
+                ++comparisons;
+
+                //If exactly match
+                int currentConsonantScore = getEvalScore(target.get(m).getShengmu().name(),alternative.get(n).getShengmu().name());
+                int currentVowelScore = getEvalScore(target.get(m).getYunmu().name(),alternative.get(n).getYunmu().name());
+                int currentToneScore = Math.abs(target.get(m).getTone() - target.get(n).getTone());
+
+
+
+                if (currentConsonantScore > SCORE_NO_MATCH && currentVowelScore >SCORE_NO_MATCH)
+                {
+                    ++length;
+                    double currentScore = (20 - Math.sqrt((SCORE_UNIT - currentConsonantScore)^2 + (SCORE_UNIT - currentVowelScore)^2));
+                    score +=  removeTone? currentScore:
+                            currentScore*(currentToneScore==SCORE_NO_MATCH?1.0:0.9);
+
+                    if (highestScore < score)
                     {
-                        ++length;
-                        score += switchScore;
-                        if (highestScore < score)
-                        {
-                            highestScore = score;
-                            longest = length;
-                            target_start = m - longest + 1;
-                            alternative_start = n - longest + 1;
-                        }
+                        highestScore = score;
+                        longest = length;
+                        target_start = m - longest + 1;
+                        alternative_start = n - longest + 1;
                     }
-                }else{
+                } else{
                     score =0;
                     length =0;
                 }

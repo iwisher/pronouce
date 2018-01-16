@@ -1,16 +1,10 @@
 package cn.applesay.tag.ext.pingying;
 
 import com.hankcs.hanlp.dictionary.py.Pinyin;
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.List;
-
-import static org.testng.Assert.*;
 
 public class PinyinTransfomerTest {
 
