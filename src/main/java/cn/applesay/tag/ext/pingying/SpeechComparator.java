@@ -34,11 +34,6 @@ public class SpeechComparator
 
     public double similarityScore(String speech, String tags)
     {
-
-
-
-
-
         List<Pinyin> pinyinSpeech =  PinyinTransfomer.getHanLPPinYin(speech);
         List<Pinyin> tagsSpeech =  PinyinTransfomer.getHanLPPinYin(tags);
         double pinyinSimilarity = this.eval.evaluateSyllable(pinyinSpeech,tagsSpeech);

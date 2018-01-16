@@ -57,8 +57,8 @@ public class Evaluator
   public double evaluateSyllable(List<Pinyin> prediction, List<Pinyin> annotation, boolean removeTone) {
 
 
-    int length = Math.max(prediction.size(),annotation.size());
-    return this.lcs.computeSyllable(prediction,annotation,removeTone)/((double) length * LongestCommonSubstring.SCORE_UNIT * 2);
+    double length = Math.max(prediction.size(),annotation.size());
+    return this.lcs.computeSyllable(prediction,annotation,removeTone)/(length * (double)LongestCommonSubstring.SCORE_UNIT);
   }
 
   /**

@@ -137,7 +137,7 @@ public class LongestCommonSubstring
         int alternative_start = -1;
 
         //The biggest score, unit is 10
-        int highestScore = 0;
+        double highestScore = 0;
         int longest=0;
 
         // record how many comparisons the solution did;
@@ -149,23 +149,25 @@ public class LongestCommonSubstring
             int m = i;
             int n = 0;
             //Matched length in this round
-            int score = 0;
+            double score = 0;
             int length = 0;
             while (m < target_size && n < alternative_size)
             {
                 ++comparisons;
 
                 //If exactly match
-                int currentConsonantScore = getEvalScore(target.get(m).getShengmu().name(),alternative.get(n).getShengmu().name());
-                int currentVowelScore = getEvalScore(target.get(m).getYunmu().name(),alternative.get(n).getYunmu().name());
-                int currentToneScore = Math.abs(target.get(m).getTone() - target.get(n).getTone());
+                Pinyin pinyinTarget = target.get(m);
+                Pinyin pinyinAlternative = alternative.get(n);
+                int currentConsonantScore = getEvalScore(pinyinTarget.getShengmu().name(), pinyinAlternative.getShengmu().name());
+                int currentVowelScore = getEvalScore(pinyinTarget.getYunmu().name(), pinyinAlternative.getYunmu().name());
+                int currentToneScore = Math.abs(pinyinTarget.getTone() - pinyinAlternative.getTone());
 
 
 
                 if (currentConsonantScore > SCORE_NO_MATCH && currentVowelScore >SCORE_NO_MATCH)
                 {
                     ++length;
-                    double currentScore = (20 - Math.sqrt((SCORE_UNIT - currentConsonantScore)^2 + (SCORE_UNIT - currentVowelScore)^2));
+                    double currentScore = (SCORE_UNIT*2.0 - Math.sqrt((SCORE_UNIT - currentConsonantScore)^2 + (SCORE_UNIT - currentVowelScore)^2))/2;
                     score +=  removeTone? currentScore:
                             currentScore*(currentToneScore==SCORE_NO_MATCH?1.0:0.9);
 
@@ -177,7 +179,7 @@ public class LongestCommonSubstring
                         alternative_start = n - longest + 1;
                     }
                 } else{
-                    score =0;
+                    score =0.0d;
                     length =0;
                 }
 
@@ -185,7 +187,7 @@ public class LongestCommonSubstring
                 ++n;
             }
         }
-        System.out.printf("from %d of %s and %d of %s, compared for %d times\t Max score is %d\t Max length is %d \n",
+        System.out.printf("from %d of %s and %d of %s, compared for %d times\t Max score is %f\t Max length is %d \n",
                 target_start, target, alternative_start, alternative, comparisons, highestScore, longest);
         return highestScore;
     }
