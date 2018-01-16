@@ -17,8 +17,8 @@ public class PinyinTransfomerTest {
     @Test
     public void testGetHomophony() throws Exception {
 
-        List<Pinyin> pinyin= PinyinTransfomer.getHanLPPinYin("不");
-        Assert.assertEquals(pinyin.size(),1);
+        List<Pinyin> pinyin= PinyinTransfomer.getHanLPPinYin("第一节哎i");
+        Assert.assertEquals(pinyin.size(),5);
         System.out.printf("Pingyin result is: %s \n\n", pinyin);
     }
 

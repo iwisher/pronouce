@@ -20,11 +20,13 @@
         </plugins>
     </build>
 
+    <!--
     <repository>
         <id>central</id>
         <name>Maven Repository Switchboard</name>
         <url>http://central.maven.org/maven2/</url>
     </repository>
+    -->
 
     <dependencies>
         <dependency>
@@ -40,10 +42,19 @@
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.hankcs/hanlp -->
+        <!--
         <dependency>
             <groupId>com.hankcs</groupId>
             <artifactId>hanlp</artifactId>
             <version>portable-1.5.3</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>1.5.3</version>
+            <scope>system</scope>
+            <systemPath>/Users/rsong/Workspace/hanlp-release/hanlp-1.5.3-release/hanlp-1.5.3.jar</systemPath>
         </dependency>
     </dependencies>
 

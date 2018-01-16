@@ -3,9 +3,8 @@ package cn.applesay.tag.ext.pingying;
 
 import cn.applesay.tag.ext.util.DeleteEndingPunctuation;
 import cn.applesay.tag.ext.util.LongestCommonSubsequence;
-import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
-import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
+
+import com.hankcs.hanlp.dictionary.py.Pinyin;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
 import java.io.IOException;
@@ -28,40 +27,27 @@ public class SpeechComparator
             e.printStackTrace();
         }
 
-        /*String parameterFile = currentDirectory + prop.getProperty("parameterFile");
-        String templateFile = currentDirectory + prop.getProperty("templateFile");
-        String homophonyFile = currentDirectory + prop.getProperty("homophonyFile");
-        boolean isCharacterLevel = Boolean.parseBoolean(prop.getProperty("isCharacterLevel"));*/
+
         String similarityFile = currentDirectory + prop.getProperty("similarityFile");
         this.pinyinWeight = Double.parseDouble(prop.getProperty("pinyinWeight"));
-        //this.pinyinTransfomer = new PinyinTransfomer(HanyuPinyinToneType.WITHOUT_TONE, HanyuPinyinVCharType.WITH_V, HanyuPinyinCaseType.LOWERCASE);
+
+        String alphabetPronunceFile = currentDirectory + prop.getProperty("alphabetPronunce");
+
         this.eval = new Evaluator(similarityFile);
     }
 
-    public double similarityScore(String speech, String gold)
-        throws BadHanyuPinyinOutputFormatCombination
+    public double similarityScore(String speech, String tags)
     {
-        double similarity = 0.0D;
-        double pinyinSimilarity = 0.0D;
-
-
-        //speech = DeleteEndingPunctuation.process(speech);
-        //gold = DeleteEndingPunctuation.process(gold);
-
-
-        //List<String[]> pinyinSpeech =  this.pinyinTransfomer.getTermPinYin(speech);
-        //List<String[]> pinyinGold = this.pinyinTransfomer.getTermPinYin(gold);
 
 
 
 
-        //if ((pinyinSpeech.size() > 0) && (pinyinGold.size() > 0)) {
-            //pinyinSimilarity = this.eval.evaluate(pinyinSpeech.get(0), pinyinGold.get(0)).getTotalSyllableScore() / 100.0F;
-        //}
-        //writingSimilarity = LongestCommonSubsequence.computeSimilarity(speech, gold);
-        similarity = this.pinyinWeight * pinyinSimilarity;// + (1.0D - this.pinyinWeight) * writingSimilarity;
 
-        return similarity;
+        List<Pinyin> pinyinSpeech =  PinyinTransfomer.getHanLPPinYin(speech);
+        List<Pinyin> tagsSpeech =  PinyinTransfomer.getHanLPPinYin(tags);
+        double pinyinSimilarity = this.eval.evaluateSyllable(pinyinSpeech,tagsSpeech);
+
+        return pinyinSimilarity;
     }
 
     /*public double similarityScore(String speech, String gold, String pinyinGold)

@@ -83,12 +83,12 @@ public class LongestCommonSubstring
                      * Prepare alternative map
                      */
                     String mapKey = target.get(m).trim() + CONCATENATED_STRING + alternative.get(n).trim();
-                    String mapKey2 = alternative.get(m).trim() +CONCATENATED_STRING+ target.get(n).trim();
+                    String mapKey2 = alternative.get(n).trim() +CONCATENATED_STRING + target.get(m).trim();
                     Integer switchScore = switchableMap.get(mapKey) != null? switchableMap.get(mapKey):switchableMap.get(mapKey2);
                     if (switchScore != null)
                     {
                         ++length;
-                        score += SCORE_UNIT;
+                        score += switchScore;
                         if (highestScore < score)
                         {
                             highestScore = score;

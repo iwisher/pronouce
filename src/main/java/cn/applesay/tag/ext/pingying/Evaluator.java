@@ -1,95 +1,51 @@
 package cn.applesay.tag.ext.pingying;
 
 import cn.applesay.tag.ext.util.LongestCommonSubstring;
+import com.hankcs.hanlp.dictionary.py.Pinyin;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 public class Evaluator
 {
   private float discount = 0.9F;
   private float weightVowel = 0.5F;
-  private float averageLength = 1.0F;
-  boolean isDebug = false;
 
-  private HashMap<String, Integer> similarity = null;
+  private enum SyllablePart {tone, vowl, consotant, both};
+
+  private LongestCommonSubstring lcs;
 
   public Evaluator(String similarityFile)
   {
-    this.similarity = new HashMap();
+    //this.similarity = new HashMap();
     try {
-      InputStream fis = Evaluator.class.getClassLoader().getResourceAsStream(similarityFile);
-      java.io.InputStreamReader isr = new java.io.InputStreamReader(fis, "UTF-8");
-      BufferedReader br = new BufferedReader(isr);
-
-      String line = null;
-      String[] tokens = (String[])null;
-      int index = -1;
-      while ((line = br.readLine()) != null) {
-        line = line.trim();
-        if ((!line.equals("")) && (!line.equals(" "))) {
-          tokens = line.split("\\s+");
-          if (tokens.length != 2) {
-            System.out.println("Check the line of similarity file: " + line);
-            System.exit(0);
-          } else {
-            this.similarity.put(tokens[0], Integer.valueOf(Integer.parseInt(tokens[1])));
-            index = tokens[0].indexOf(LongestCommonSubstring.CONCATENATED_STRING);
-            if (index < 0) {
-              System.out.println("Check the line of similarity file: " + line);
-            }
-            this.similarity.put(tokens[0].substring(index + 1) + "_" + tokens[0].substring(0, index), Integer.valueOf(Integer.parseInt(tokens[1])));
-          }
+      Properties similarity = new Properties();
+      InputStream fileInputStream = PinyinTransfomer.class.getClassLoader().getResourceAsStream(similarityFile);
+      similarity.load(fileInputStream);
+      HashMap<String, Integer> similarityMap = new HashMap<>();
+      for (String key: similarity.stringPropertyNames())
+      {
+        try{
+          similarityMap.put(key, Integer.parseInt(similarity.getProperty(key)));
+        }catch (NumberFormatException nfe)
+        {
+          nfe.printStackTrace(System.err);
         }
       }
-
-      br.close();
-      isr.close();
-      fis.close();
-    } catch (Exception e) {
+      this.lcs = new LongestCommonSubstring(similarityMap);
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  /*
-  public double similarity(String py1, String py2)
-  {
-    double score = 0.0D;
-    String pair = null;
-    String[] component1 = split(py1).split("\\s+");
-    String[] component2 = split(py2).split("\\s+");
 
+  public double evaluateSyllable(List<Pinyin> prediction, List<Pinyin> annotation) {
 
-
-    if (component1[0].equals(component2[0])) {
-      score += 10.0D;
-    }
-    else {
-      pair = component1[0] + "_" + component2[0];
-      if (this.similarity.containsKey(pair)) {
-        score += ((Integer)this.similarity.get(pair)).intValue();
-      }
-    }
-    if (component1[1].equals(component2[1])) {
-      score += 10.0D;
-    }
-    else {
-      pair = component1[1] + "_" + component2[1];
-      if (this.similarity.containsKey(pair)) {
-        score += ((Integer)this.similarity.get(pair)).intValue();
-      }
-    }
-    score /= 2.0D;
-    if (!component1[2].equals(component2[2])) {
-      score *= this.discount;
-    }
-    return score;
+    return this.evaluateSyllable(prediction,annotation,true);
   }
-  */
 
   /**
    *
@@ -97,29 +53,74 @@ public class Evaluator
    * @param annotation tags
    * @return
    */
+  public double evaluateSyllable(List<Pinyin> prediction, List<Pinyin> annotation, boolean removeTone) {
 
-
-
-
-
-  private boolean isPinyin(String str)
-  {
-    if (str != null) {
-      int length = str.length();
-      if ((length > 1) &&
-        (isTone(str.substring(length - 1)))) {
-        return true;
-      }
-    }
-
-    return false;
+    ArrayList<String> predictionTone = getPinyinString(prediction, SyllablePart.both);
+    ArrayList<String> annotationTone = getPinyinString(annotation, SyllablePart.both);
+    int length = Math.max(prediction.size(),annotation.size());
+    return this.lcs.compute(predictionTone,annotationTone)/((double) length * LongestCommonSubstring.SCORE_UNIT * 2);
   }
 
-  public boolean isTone(String tone) {
-    if ((tone.equals("0")) || (tone.equals("1")) || (tone.equals("2")) || (tone.equals("3")) || (tone.equals("4"))) {
-      return true;
-    }
-
-    return false;
+  /**
+   *
+   * @param prediction
+   * @param annotation
+   * @return
+   */
+  public double evaluateConsonant(List<Pinyin> prediction, List<Pinyin> annotation) {
+    ArrayList<String> predictionTone = getPinyinString(prediction, SyllablePart.consotant);
+    ArrayList<String> annotationTone = getPinyinString(annotation, SyllablePart.consotant);
+    int length = Math.max(prediction.size(),annotation.size());
+    return this.lcs.compute(predictionTone,annotationTone)/((double) length * LongestCommonSubstring.SCORE_UNIT);
   }
+
+  /**
+   *
+   * @param prediction
+   * @param annotation
+   * @return
+   */
+  public double evaluateVowel(List<Pinyin> prediction, List<Pinyin> annotation) {
+    ArrayList<String> predictionTone = getPinyinString(prediction, SyllablePart.vowl);
+    ArrayList<String> annotationTone = getPinyinString(annotation, SyllablePart.vowl);
+    int length = Math.max(prediction.size(),annotation.size());
+    return this.lcs.compute(predictionTone,annotationTone)/((double) length * LongestCommonSubstring.SCORE_UNIT);
+  }
+
+  /**
+   *
+   * @param prediction
+   * @param annotation
+   * @return
+   */
+  public double evaluateTone(List<Pinyin> prediction, List<Pinyin> annotation) {
+      ArrayList<String> predictionTone = getPinyinString(prediction, SyllablePart.tone);
+      ArrayList<String> annotationTone = getPinyinString(annotation, SyllablePart.tone);
+      int length = Math.max(prediction.size(),annotation.size());
+      return this.lcs.compute(predictionTone,annotationTone)/((double) length * LongestCommonSubstring.SCORE_UNIT);
+  }
+
+  private ArrayList<String> getPinyinString(List<Pinyin> prediction,SyllablePart part) {
+    ArrayList<String> toneList = new ArrayList<String>();
+    for(Pinyin p:prediction)
+    {
+      switch (part) {
+            case tone:
+              toneList.add(String.valueOf(p.getTone()));
+              break;
+            case consotant:
+              toneList.add(String.valueOf(p.getShengmu()));
+              break;
+            case vowl:
+              toneList.add(String.valueOf(p.getYunmu()));
+              break;
+            case both:
+              toneList.add(String.valueOf(p.getShengmu()));
+              toneList.add(String.valueOf(p.getYunmu()));
+              break;
+          }
+    }
+    return toneList;
+  }
+
 }

@@ -29,7 +29,7 @@ public class PinyinTransfomer
         final String currentDirectory ="pinying/";
         final String speechSimilarityEstimatorFile="alphabetPronunce.properties";
         try {
-            InputStream fileInputStream = SpeechComparator.class.getClassLoader().getResourceAsStream(currentDirectory+speechSimilarityEstimatorFile);
+            InputStream fileInputStream = PinyinTransfomer.class.getClassLoader().getResourceAsStream(currentDirectory+speechSimilarityEstimatorFile);
             prop.load(fileInputStream);
         } catch (IOException e) {
             e.printStackTrace();
